@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Tree</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/treant-js/1.0/Treant.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.2.7/raphael.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/treant-js/1.0/Treant.min.js"></script>
+
+    <style>
+        .node {
+            border: 1px solid black;
+        }
+        .node p {
+            margin-left: 24px;
+            margin-right: 24px;
+        }
+    </style>
+</head>
+<body>
+<div id="tree"></div>
+<script>
+    var json = {{.}};
+
+    simple_chart_config = {
+        chart: {
+            container: "#tree"
+        },
+
+        nodeStructure: json
+    };
+
+    var my_chart = new Treant(simple_chart_config);
+</script>
+</body>
+</html>

@@ -1,7 +1,9 @@
 package decision_tree
 
 import (
+	_ "encoding/json"
 	"math"
+	_ "os"
 )
 
 type Matrix []Vector
@@ -81,6 +83,20 @@ type Node struct {
 	terminalValue float64
 	left          *Node
 	right         *Node
+	labels        []string
+}
+
+func (n *Node) SetLabels(labels []string) {
+	n.labels = labels
+}
+
+type NodeText struct {
+	Name string `json:"name"`
+}
+
+type NodeJSON struct {
+	Text     NodeText    `json:"text"`
+	Children []*NodeJSON `json:"children"`
 }
 
 type String string

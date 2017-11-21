@@ -6,6 +6,8 @@ import (
 	"encoding/csv"
 	"io"
 	"strconv"
+	"encoding/json"
+	"html/template"
 )
 
 // Calculate the Gini index for a split dataset
@@ -183,6 +185,36 @@ func PrintTree(node *Node, depth int) {
 	}
 }
 
+func (n Node) ToNodeJSON() *NodeJSON {
+	return nodeJSON(&n, n.labels)
+}
+
+func nodeJSON(node *Node, labels []string) *NodeJSON {
+	if node == nil {
+		return nil
+	}
+
+	if node.terminal {
+		n := &NodeJSON{
+			Text:NodeText{
+				Name:fmt.Sprintf("%.0f\n", node.terminalValue),
+			},
+		}
+		return n
+	}
+
+	n := &NodeJSON{
+		Text:NodeText{
+			Name:fmt.Sprintf("%s < %.3f\n", labels[node.index], node.value),
+		},
+	}
+
+	n.Children = make([]*NodeJSON, 2, 2)
+	n.Children[0] = nodeJSON(node.left, labels)
+	n.Children[1] = nodeJSON(node.right, labels)
+	return n
+}
+
 func Predict(node *Node, row Vector) float64  {
 	return predict(node, row).terminalValue
 }
@@ -199,7 +231,7 @@ func predict(node *Node, row Vector) *Node {
 	}
 }
 
-func LoadIris() Matrix {
+func LoadIris() (Matrix, []string) {
 	csvFile, err := os.Open("iris.csv")
 	if err != nil {
 		panic(err)
@@ -208,12 +240,14 @@ func LoadIris() Matrix {
 	csvReader := csv.NewReader(csvFile)
 
 	var out Matrix
+	var labels []string
 
 	counter := 0
 
 	for {
 		record, err := csvReader.Read()
 		if counter == 0 {
+			labels = record[:len(record) - 1]
 			counter++
 			continue
 		}
@@ -227,10 +261,10 @@ func LoadIris() Matrix {
 		out = append(out, stringSliceToFloat(record))
 	}
 
-	return out
+	return out, labels
 }
 
-func LoadTitanic() Matrix {
+func LoadTitanic() (Matrix, []string) {
 	csvFile, err := os.Open("titanic.csv")
 	if err != nil {
 		panic(err)
@@ -239,6 +273,7 @@ func LoadTitanic() Matrix {
 	csvReader := csv.NewReader(csvFile)
 
 	var out Matrix
+	var labels []string
 
 	counter := 0
 
@@ -246,6 +281,7 @@ func LoadTitanic() Matrix {
 		record, err := csvReader.Read()
 		if counter == 0 {
 			counter++
+			labels = record[1:len(record)-1]
 			continue
 		}
 
@@ -258,7 +294,27 @@ func LoadTitanic() Matrix {
 		out = append(out, stringSliceToFloat(record[1:]))
 	}
 
-	return out
+	return out, labels
+}
+
+func VisualizeTree(node *Node) {
+	root := nodeJSON(node, node.labels)
+
+	b, _ := json.Marshal(root)
+
+	t, err := template.ParseFiles("template/index.html")
+
+	if err != nil {
+		panic(err)
+	}
+
+	f, err := os.OpenFile("tree.html", os.O_WRONLY | os.O_CREATE, 0600)
+
+	if err != nil {
+		panic(err)
+	}
+
+	t.Lookup("index.html").Execute(f, template.JS(b))
 }
 
 

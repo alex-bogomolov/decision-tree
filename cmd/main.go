@@ -13,13 +13,10 @@ func main() {
 	accuracy()
 }
 
-func jsonTest() {
-}
-
 func accuracy() {
 	dataset, labels := dt.LoadTitanic()
 
-	tree := dt.BuildTree(dataset, 5, 10)
+	tree := dt.BuildTree(dataset, 3, 10)
 	tree.SetLabels(labels)
 	dt.VisualizeTree(tree)
 

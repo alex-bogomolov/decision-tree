@@ -308,7 +308,7 @@ func VisualizeTree(node *Node) {
 		panic(err)
 	}
 
-	f, err := os.OpenFile("tree.html", os.O_WRONLY | os.O_CREATE, 0600)
+	f, err := os.OpenFile("tree.html", os.O_WRONLY | os.O_CREATE | os.O_TRUNC, 0600)
 
 	if err != nil {
 		panic(err)
